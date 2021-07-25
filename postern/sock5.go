@@ -1,6 +1,8 @@
 package postern
 
 import (
+	"errors"
+	"io"
 	"net"
 	"strconv"
 	"strings"
@@ -8,6 +10,20 @@ import (
 
 // local side
 func HandShake(conn net.Conn) (err error) {
+	buf := make([]byte, 257, 257) // 2 + 255
+	var n int
+	if n, err = io.ReadAtLeast(conn, buf, 2); err != nil {
+		return
+	}
+	// check protocol
+	if buf[0] != 0x05 {
+		return errors.New("version error")
+	}
+	if byte(n) != buf[1] + 2 {
+		return errors.New("nmethod error")
+	}
+	// reply
+	_, err = conn.Write([]byte{0x05, 0x00})
 	return nil
 }
 
