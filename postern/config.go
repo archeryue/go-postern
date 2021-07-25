@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	localPort  int		`json:"local_port"`
-	remotePort int		`json:"remote_port"`
-	remoteIp   string	`json:"remote_ip"`
-	key        string	`json:"key"`
+	LocalPort  int		`json:"local_port"`
+	RemotePort int		`json:"remote_port"`
+	RemoteIp   string	`json:"remote_ip"`
+	Key        string	`json:"key"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {
