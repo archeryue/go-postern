@@ -19,7 +19,7 @@ func DarkDial(dest, remote string, cipher *Cipher) (conn *DarkConn, err error) {
 		return
 	}
 	conn = NewConn(c, cipher)
-	if _, err := conn.Write(GenHead(dest)); err != nil {
+	if _, err := conn.Write(GenDestMsg(dest)); err != nil {
 		conn.Close()
 		return nil, err
 	}

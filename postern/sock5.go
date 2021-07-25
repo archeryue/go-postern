@@ -6,17 +6,19 @@ import (
 	"strings"
 )
 
+// local side
 func HandShake(conn net.Conn) (err error) {
 	return nil
 }
 
-func ReadDest(conn net.Conn) (dest string, err error) {
+func LocalReadDest(conn net.Conn) (dest string, err error) {
 	//TODO: read dest
 	_, err = conn.Write([]byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x43})
 	return "", nil
 }
 
-func GenHead(dest string) []byte {
+// remote side
+func GenDestMsg(dest string) []byte {
 	arr := strings.Split(dest, ":")
 	ip := arr[0]
 	port, _ := strconv.Atoi(arr[1])
@@ -32,4 +34,8 @@ func GenHead(dest string) []byte {
 	buf[2+ipLen+1] = byte(port & 0xFF)      // low 8 bits
 
 	return buf
+}
+
+func RemoteReadDest(conn net.Conn) (dest string, extra []byte, err error) {
+	return "", nil, nil
 }

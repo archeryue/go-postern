@@ -18,7 +18,7 @@ func handle(config *pst.Config, conn net.Conn) {
 		return
 	}
 	// second handshake: read true dest from second request
-	dest, err := pst.ReadDest(conn)
+	dest, err := pst.LocalReadDest(conn)
 	if err != nil {
 		log.Println("read dest error: ", err)
 		return
