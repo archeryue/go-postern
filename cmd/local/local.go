@@ -11,9 +11,31 @@ import (
 
 func handle(config *pst.Config, conn net.Conn) {
 	defer conn.Close() 
-	//TODO: sock5 handshake, get local request
-	//TODO: send request to remote, get response
-	//TODO: send response back to local
+	// first handshake: select method
+	err := pst.HandShake(conn)
+	if err != nil {
+		log.Println("handshake error: ", err)
+		return
+	}
+	// second handshake: read true dest from second request
+	dest, err := pst.ReadDest(conn)
+	if err != nil {
+		log.Println("read dest error: ", err)
+		return
+	}
+	// establish DarkConn with remote server
+	remoteAddr := config.RemoteIp + ":" + strconv.Itoa(config.RemotePort)
+	remote, err := pst.DarkDial(dest, remoteAddr, pst.NewCipher(config.Key))
+	if err != nil {
+		log.Println("dark dail error: ", err)
+		return
+	}
+	defer remote.Close()
+	// forward data, the DarkConn will encode/decode automatically
+	end := make(chan byte, 2)
+	go pst.Forward(conn, remote, end)
+	go pst.Forward(remote, conn, end)
+	<-end
 }
 
 func serve(config *pst.Config) {

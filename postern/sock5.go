@@ -10,7 +10,9 @@ func HandShake(conn net.Conn) (err error) {
 	return nil
 }
 
-func ReadRequest(conn net.Conn) (dest string, err error) {
+func ReadDest(conn net.Conn) (dest string, err error) {
+	//TODO: read dest
+	_, err = conn.Write([]byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x43})
 	return "", nil
 }
 
