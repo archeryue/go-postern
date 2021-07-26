@@ -19,13 +19,14 @@ func DarkDial(dest, remote string, cipher *Cipher) (conn *DarkConn, err error) {
 		return
 	}
 	conn = NewConn(c, cipher)
-	if _, err := conn.Write(GenDestMsg(dest)); err != nil {
+	if _, err := conn.Write(EncodeDest(dest)); err != nil {
 		conn.Close()
 		return nil, err
 	}
 	return
 }
 
+// overload net.Conn.Read()
 func (conn DarkConn) Read(data []byte) (n int, err error) {
 	buf := make([]byte, len(data), len(data))
 	n, err = conn.Conn.Read(buf)
@@ -35,6 +36,7 @@ func (conn DarkConn) Read(data []byte) (n int, err error) {
 	return
 }
 
+// overload net.Conn.Write()
 func (conn DarkConn) Write(data []byte) (n int, err error) {
 	buf := make([]byte, len(data), len(data))
 	conn.Encode(data, buf)
