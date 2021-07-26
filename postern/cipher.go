@@ -8,16 +8,16 @@ import (
 	"sort"
 )
 
-type Table [256]byte
-
 type Cipher interface {
 	Encode([]byte, []byte)	
 	Decode([]byte, []byte)
 }
 
+type crTable [256]byte
+
 type cipher struct {
-	encTable *Table
-	decTable *Table
+	encTable *crTable
+	decTable *crTable
 }
 
 func NewCipher(key string) Cipher {
@@ -39,12 +39,12 @@ func NewCipher(key string) Cipher {
 		})
 	}
 
-	enc := &Table{}
+	enc := &crTable{}
 	for i := range table {
 		enc[i] = table[i]
 	}
 
-	dec := &Table{}
+	dec := &crTable{}
 	for i, v := range table {
 		dec[v] = byte(i)
 	}
