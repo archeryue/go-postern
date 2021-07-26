@@ -9,7 +9,7 @@ import (
 func Forward(in, out net.Conn, end chan byte) {
 	buf := make([]byte, 4096)
 	for {
-		//TODO: timetou
+		//TODO: timeout
 		n, err := in.Read(buf)
 		if n > 0 {
 			if _, err = out.Write(buf[:n]); err != nil {
