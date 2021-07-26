@@ -17,17 +17,17 @@ func handle(conn *pst.DarkConn) {
 		log.Println("read dest error: ", err)
 		return
 	}
-	// connect target
-	target, err := net.Dial("tcp", dest)
+	// connect dest host
+	destConn, err := net.Dial("tcp", dest)
 	if err != nil {
 		log.Println("dail target error: ", err)
 		return
 	}
-	defer target.Close()
-	// forward data, the DarkConn will encode/decode automatically
+	defer destConn.Close()
+	// forward data, the DarkConn(conn) will encode/decode automatically
 	end := make(chan byte, 2)
-	go pst.Forward(conn, target, end)
-	go pst.Forward(target, conn, end)
+	go pst.Forward(conn, destConn, end)
+	go pst.Forward(destConn, conn, end)
 	<-end
 }
 
