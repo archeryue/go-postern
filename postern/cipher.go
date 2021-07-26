@@ -10,12 +10,17 @@ import (
 
 type Table [256]byte
 
-type Cipher struct {
+type Cipher interface {
+	Encode([]byte, []byte)	
+	Decode([]byte, []byte)
+}
+
+type cipher struct {
 	encTable *Table
 	decTable *Table
 }
 
-func NewCipher(key string) *Cipher {
+func NewCipher(key string) Cipher {
 	hash := md5.New()
 	io.WriteString(hash, key)
 	buffer := bytes.NewBuffer(hash.Sum(nil))
@@ -44,20 +49,20 @@ func NewCipher(key string) *Cipher {
 		dec[v] = byte(i)
 	}
 
-	return &Cipher{
+	return &cipher{
 		encTable: enc,
 		decTable: dec,
 	}
 }
 
-func (cipher *Cipher) Encode(in, out []byte) {
+func (c *cipher) Encode(in, out []byte) {
 	for i, v := range in {
-		out[i] = cipher.encTable[v]
+		out[i] = c.encTable[v]
 	}
 }
 
-func (cipher *Cipher) Decode(in, out []byte) {
+func (c *cipher) Decode(in, out []byte) {
 	for i, v := range in {
-		out[i] = cipher.decTable[v]
+		out[i] = c.decTable[v]
 	}
 }
