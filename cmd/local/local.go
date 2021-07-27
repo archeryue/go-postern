@@ -1,4 +1,4 @@
-package local
+package main
 
 import (
 	"log"
@@ -17,12 +17,14 @@ func handle(config *pst.Config, conn net.Conn) {
 		log.Println("handshake error: ", err)
 		return
 	}
+	log.Println("handshake success")
 	// second handshake: read true dest from second request
 	dest, err := pst.LocalReadDest(conn)
 	if err != nil {
 		log.Println("read dest error: ", err)
 		return
 	}
+	log.Println("read dest:" + dest)
 	// establish DarkConn with remote server
 	remoteAddr := config.RemoteIp + ":" + strconv.Itoa(config.RemotePort)
 	remote, err := pst.DarkDial(dest, remoteAddr, pst.NewCipher(config.Key))
@@ -31,6 +33,7 @@ func handle(config *pst.Config, conn net.Conn) {
 		return
 	}
 	defer remote.Close()
+	log.Println("dark dail success")
 	// forward data, the DarkConn will encode/decode automatically
 	end := make(chan byte, 2)
 	go pst.Forward(conn, remote, end)
