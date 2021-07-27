@@ -10,7 +10,7 @@ import (
 
 const (
 	sockVer = 0x05 // socks5
-	noAuth	= 0x00 // success
+	noAuth  = 0x00 // success
 	cmdType = 0x01 // connect
 	rsvByte = 0x00 // meanless
 	addType = 0x03 // domain
@@ -35,6 +35,7 @@ func HandShake(conn net.Conn) (err error) {
 	if buf[0] != sockVer {
 		return errVer
 	}
+
 	if byte(n) != buf[1]+2 {
 		return errMtd
 	}
@@ -44,6 +45,19 @@ func HandShake(conn net.Conn) (err error) {
 }
 
 func DecodeDest(buf []byte) (dest string, err error) {
+	dmLen := len(buf) - 2
+	domain := string(buf[:dmLen])
+	var port int
+	port = int(buf[dmLen])
+	port = (port << 8) | int(buf[dmLen+1])
+	dest = domain + ":" + strconv.Itoa(port)
+	return
+}
+
+func LocalReadDest(conn net.Conn) (dest string, err error) {
+	headLen := 1 + 1 + 1 + 1 + 1 // ver + cmd + rsv + type + len
+	buf := make([]byte, headLen, headLen)
+	io.ReadFull(conn, buf)
 	if buf[0] != sockVer {
 		return "", errVer
 	}
@@ -57,19 +71,8 @@ func DecodeDest(buf []byte) (dest string, err error) {
 	if buf[3] != addType {
 		return "", errAdd
 	}
-
 	dmLen := int(buf[4])
-	domain := string(buf[5 : 5 + dmLen])
-	var port int
-	port = int(buf[5 + dmLen])
-	port = (port << 8) | int(buf[5 + dmLen + 1])
-	dest = domain + ":" + strconv.Itoa(port)
-	return
-}
-
-func LocalReadDest(conn net.Conn) (dest string, err error) {
-	msgLen := 1 + 1 + 1 + 1 + 1 + 255 + 2 // ver + cmd + rsv + type + len + domain + port
-	buf := make([]byte, msgLen, msgLen)
+	buf = make([]byte, dmLen+2, dmLen+2)
 	io.ReadFull(conn, buf)
 	// get dest addr
 	dest, err = DecodeDest(buf)
@@ -78,7 +81,7 @@ func LocalReadDest(conn net.Conn) (dest string, err error) {
 	}
 	// reply success
 	_, err = conn.Write([]byte{sockVer, succRep, rsvByte, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x43})
-	return "", nil
+	return
 }
 
 // we encode it ourself, so it has no err
@@ -93,7 +96,7 @@ func EncodeDest(dest string) []byte {
 	buf[0] = sockVer
 	buf[1] = addType
 	buf[2] = byte(len(domain))               // domain length
-	copy(buf[2:], []byte(domain))            // domain bytes
+	copy(buf[3:], []byte(domain))            // domain bytes
 	buf[msgLen-2] = byte((port >> 8) & 0xFF) // port high 8 bits
 	buf[msgLen-1] = byte(port & 0xFF)        // port low 8 bits
 
@@ -111,13 +114,9 @@ func RemoteReadDest(conn net.Conn) (dest string, err error) {
 	}
 	// read domain & port
 	dmLen := int(buf[2])
-	buf = make([]byte, dmLen + 2, dmLen + 2)
+	buf = make([]byte, dmLen+2, dmLen+2)
 	io.ReadFull(conn, buf)
 	// decode
-	domain := string(buf[:dmLen])
-	var port int
-	port = int(buf[dmLen])
-	port = (port << 8) | int(buf[dmLen + 1])
-	dest = domain + ":" + strconv.Itoa(port)
+	dest, err = DecodeDest(buf)
 	return
 }

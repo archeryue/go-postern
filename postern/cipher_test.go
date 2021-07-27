@@ -1,6 +1,10 @@
 package postern
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestEncode(t *testing.T) {
 	cipher := NewCipher("foobar!")
@@ -9,9 +13,5 @@ func TestEncode(t *testing.T) {
 	cipher.Encode(raw, data)
 	msg := make([]byte, len(data), len(data))
 	cipher.Decode(data, msg)
-	for i, v := range raw {
-		if v != msg[i] {
-			t.Fatalf("%s: encode error at index %d\n", msg, i)
-		}
-	}
+	assert.Equal(t, raw, msg)
 }
