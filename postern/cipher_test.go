@@ -6,12 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEncode(t *testing.T) {
-	cipher := NewCipher("foobar!")
+func TestDft(t *testing.T) {
+	cipher := NewCipher("foobar!", Dft)
 	raw := []byte("Hello World!")
-	data := make([]byte, len(raw), len(raw))
-	cipher.Encode(raw, data)
-	msg := make([]byte, len(data), len(data))
-	cipher.Decode(data, msg)
+	data := cipher.Encrypt(raw)
+	msg := cipher.Decrypt(data)
+	assert.Equal(t, raw, msg)
+}
+
+func TestRc4(t *testing.T) {
+	cipher := NewCipher("foobar!", Rc4)
+	raw := []byte("Hello World!")
+	data := cipher.Encrypt(raw)
+	msg := cipher.Decrypt(data)
 	assert.Equal(t, raw, msg)
 }

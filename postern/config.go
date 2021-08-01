@@ -11,6 +11,7 @@ type Config struct {
 	RemotePort int		`json:"remote_port"`
 	RemoteIp   string	`json:"remote_ip"`
 	Key        string	`json:"key"`
+	Method	   int		`json:"cipher"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

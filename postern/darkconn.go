@@ -31,15 +31,15 @@ func (conn *DarkConn) Read(data []byte) (n int, err error) {
 	buf := make([]byte, len(data), len(data))
 	n, err = conn.Conn.Read(buf)
 	if n > 0 {
-		conn.Decode(buf, data)
+		tmp := conn.Decrypt(buf)
+		copy(data, tmp)
 	}
 	return
 }
 
 // overload net.Conn.Write()
 func (conn *DarkConn) Write(data []byte) (n int, err error) {
-	buf := make([]byte, len(data), len(data))
-	conn.Encode(data, buf)
+	buf := conn.Encrypt(data)
 	n, err = conn.Conn.Write(buf)
 	return
 }

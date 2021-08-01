@@ -27,7 +27,7 @@ func handle(config *pst.Config, conn net.Conn) {
 	log.Println("dest: " + dest)
 	// establish DarkConn with remote server
 	remoteAddr := config.RemoteIp + ":" + strconv.Itoa(config.RemotePort)
-	remote, err := pst.DarkDial(dest, remoteAddr, pst.NewCipher(config.Key))
+	remote, err := pst.DarkDial(dest, remoteAddr, pst.NewCipher(config.Key, config.Method))
 	if err != nil {
 		log.Println("dark dail error: ", err)
 		return

@@ -9,9 +9,16 @@ import (
 )
 
 type Cipher interface {
-	Encode([]byte, []byte)	
-	Decode([]byte, []byte)
+	Encrypt([]byte) []byte
+	Decrypt([]byte) []byte
 }
+
+const (
+	Dft = 0
+	Rc4 = 1
+	Des = 2
+	Aes = 3
+)
 
 type crTable [256]byte
 
@@ -20,7 +27,16 @@ type cipher struct {
 	decTable *crTable
 }
 
-func NewCipher(key string) Cipher {
+func NewCipher(key string, mtd int) Cipher {
+	switch mtd {
+		case Rc4:
+			return NewRC4(key)
+		default:
+			return defaultCipher(key)
+	}
+}
+
+func defaultCipher(key string) *cipher {
 	hash := md5.New()
 	io.WriteString(hash, key)
 	buffer := bytes.NewBuffer(hash.Sum(nil))
@@ -55,14 +71,18 @@ func NewCipher(key string) Cipher {
 	}
 }
 
-func (c *cipher) Encode(in, out []byte) {
-	for i, v := range in {
-		out[i] = c.encTable[v]
+func (c *cipher) Encrypt(data []byte) []byte {
+	ret := make([]byte, len(data), len(data))
+	for i, v := range data {
+		ret[i] = c.encTable[v]
 	}
+	return ret
 }
 
-func (c *cipher) Decode(in, out []byte) {
-	for i, v := range in {
-		out[i] = c.decTable[v]
+func (c *cipher) Decrypt(data []byte) []byte {
+	ret := make([]byte, len(data), len(data))
+	for i, v := range data {
+		ret[i] = c.decTable[v]
 	}
+	return ret
 }

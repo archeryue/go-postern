@@ -38,7 +38,7 @@ func serve(config *pst.Config) {
 	}
 	log.Printf("start serving, port : %v\n", config.RemotePort)
 
-	cipher := pst.NewCipher(config.Key)
+	cipher := pst.NewCipher(config.Key, config.Method)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
