@@ -9,6 +9,6 @@ import (
 func TestDest(t *testing.T) {
 	dest := "www.google.com:443"
 	buf := EncodeDest(dest)
-	ret, _ := DecodeDest(buf[3:])
+	ret, _ := DecodeDest(buf)
 	assert.Equal(t, dest, ret)
 }

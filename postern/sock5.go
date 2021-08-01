@@ -84,22 +84,30 @@ func LocalReadDest(conn net.Conn) (dest string, err error) {
 	return
 }
 
-// we encode it ourself, so it has no err
 func EncodeDest(dest string) []byte {
 	arr := strings.Split(dest, ":")
 	domain := arr[0]
 	port, _ := strconv.Atoi(arr[1])
 
-	msgLen := 1 + 1 + 1 + len(domain) + 2 // ver + type + len + domain + port
+	dtLen := len(domain) + 2
+	buf := make([]byte, dtLen, dtLen)
+
+	copy(buf, []byte(domain))
+	buf[dtLen-2] = byte((port >> 8) & 0xFF) // port high 8 bits
+	buf[dtLen-1] = byte(port & 0xFF)        // port low 8 bits
+	return buf
+}
+
+// we encode it ourself, so it has no err
+func EncodeRequest(dest string) []byte {
+	dt := EncodeDest(dest)
+	msgLen := 1 + 1 + 1 + len(dt) // ver + type + len + domain + port
 	buf := make([]byte, msgLen, msgLen)
 
 	buf[0] = sockVer
 	buf[1] = addType
-	buf[2] = byte(len(domain))               // domain length
-	copy(buf[3:], []byte(domain))            // domain bytes
-	buf[msgLen-2] = byte((port >> 8) & 0xFF) // port high 8 bits
-	buf[msgLen-1] = byte(port & 0xFF)        // port low 8 bits
-
+	buf[2] = byte(len(dt) - 2) // domain length
+	copy(buf[3:], dt)          // domain & port bytes
 	return buf
 }
 
