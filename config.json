@@ -3,5 +3,5 @@
     "remote_port": 55555,
     "remote_ip": "123.0.0.1",
     "key": "hello",
-    "cipher": 0
+    "cipher": 1
 }
