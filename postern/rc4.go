@@ -5,17 +5,21 @@ import (
 	"io"
 )
 
-type sbox [256]byte
+type sbox struct {
+	s	[256]byte
+	i	int
+	j	int
+}
 
 type RC4 struct {
-	sr *sbox
-	sw *sbox
+	es *sbox
+	ds *sbox
 }
 
 func (b *sbox) swap(i, j int) {
-	b[i] ^= b[j]
-	b[j] ^= b[i]
-	b[i] ^= b[j]
+	b.s[i] ^= b.s[j]
+	b.s[j] ^= b.s[i]
+	b.s[i] ^= b.s[j]
 }
 
 func NewRC4(key string) *RC4 {
@@ -23,40 +27,39 @@ func NewRC4(key string) *RC4 {
 	io.WriteString(hash, key)
 	k := hash.Sum(nil)
 
-	var r sbox
-	for i := range r {
-		r[i] = byte(i)
+	var e sbox
+	for i := range e.s {
+		e.s[i] = byte(i)
 	}
 
 	j := 0
 	for i := 0; i < 256; i++ {
-		j = (j + int(r[i]) + int(k[i%len(k)])) % 256
-		r.swap(i, j)
+		j = (j + int(e.s[i]) + int(k[i%len(k)])) % 256
+		e.swap(i, j)
 	}
-	var w sbox = r
+	var d sbox = e
 
-	return &RC4{
-		sr: &r,
-		sw: &w,
+	return &RC4 {
+		es: &e,
+		ds: &d,
 	}
 }
 
-func rc4(s *sbox, data []byte) []byte {
+func rc4(b *sbox, data []byte) []byte {
 	ret := make([]byte, len(data), len(data))
-	i, j := 0, 0
 	for k, v := range data {
-		i = (i + 1) % 256
-		j = (j + int(s[i])) % 256
-		s.swap(i, j)
-		ret[k] = v ^ s[int(s[i]+s[j])%256]
+		b.i = (b.i + 1) % 256
+		b.j = (b.j + int(b.s[b.i])) % 256
+		b.swap(b.i, b.j)
+		ret[k] = v ^ b.s[int(b.s[b.i] + b.s[b.j]) % 256]
 	}
 	return ret
 }
 
 func (c *RC4) Encrypt(data []byte) []byte {
-	return rc4(c.sw, data)
+	return rc4(c.es, data)
 }
 
 func (c *RC4) Decrypt(data []byte) []byte {
-	return rc4(c.sr, data)
+	return rc4(c.ds, data)
 }
