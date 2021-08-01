@@ -10,7 +10,7 @@ import (
 )
 
 func handle(conn *pst.DarkConn) {
-	defer conn.Close() 
+	defer conn.Close()
 	// read dest addr
 	dest, err := pst.RemoteReadDest(conn)
 	if err != nil {
@@ -32,19 +32,19 @@ func handle(conn *pst.DarkConn) {
 }
 
 func serve(config *pst.Config) {
-	listener, err := net.Listen("tcp", ":" + strconv.Itoa(config.RemotePort))
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(config.RemotePort))
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("start serving, port : %v\n", config.RemotePort)
 
-	cipher := pst.NewCipher(config.Key, config.Method)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Println("accept error: ", err)
 			continue
 		}
+		cipher := pst.NewCipher(config.Key, config.Method)
 		go handle(pst.NewConn(conn, cipher))
 	}
 }

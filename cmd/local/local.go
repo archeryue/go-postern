@@ -47,6 +47,7 @@ func serve(config *pst.Config) {
 		log.Fatal(err)
 	}
 	log.Printf("start serving, port : %v\n", config.LocalPort)
+	log.Println(config)
 
 	for {
 		conn, err := listener.Accept()
