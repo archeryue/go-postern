@@ -27,12 +27,11 @@ func DarkDial(dest, remote string, cipher Cipher) (conn *DarkConn, err error) {
 }
 
 // overload net.Conn.Read()
-func (conn *DarkConn) Read(data []byte) (n int, err error) {
-	buf := make([]byte, len(data), len(data))
+func (conn *DarkConn) Read(buf []byte) (n int, err error) {
 	n, err = conn.Conn.Read(buf)
 	if n > 0 {
-		tmp := conn.Decrypt(buf)
-		copy(data, tmp)
+		data := conn.Decrypt(buf[:n])
+		copy(buf, data)
 	}
 	return
 }
