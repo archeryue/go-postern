@@ -52,7 +52,7 @@ func handle(config *pst.Config, conn net.Conn) {
 	end := make(chan byte, 2)
 	go pst.Forward(conn, remote, end)
 	go pst.Forward(remote, conn, end)
-	// each one of two conns is end
+	// any one of two conns is end
 	<-end
 }
 
