@@ -12,6 +12,7 @@ type Config struct {
 	RemoteIp   string	`json:"remote_ip"`
 	Key        string	`json:"key"`
 	Method	   int		`json:"cipher"`
+	Block	   []string	`json:"block"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

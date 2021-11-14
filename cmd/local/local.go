@@ -5,9 +5,19 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 
 	pst "github.com/archeryue/go-postern/postern"
 )
+
+func block(list []string, dest string) bool {
+	for _, value := range list {
+		if strings.Contains(dest, value) {
+			return true
+		}
+	}
+	return false
+}
 
 func handle(config *pst.Config, conn net.Conn) {
 	defer conn.Close() 
@@ -22,6 +32,10 @@ func handle(config *pst.Config, conn net.Conn) {
 	dest, err := pst.LocalReadDest(conn)
 	if err != nil {
 		log.Println("read dest error: ", err)
+		return
+	}
+	if block(config.Block, dest) {
+		log.Println("hit block list" + dest)
 		return
 	}
 	log.Println("dest: " + dest)
