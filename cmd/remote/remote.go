@@ -28,6 +28,8 @@ func handle(conn *pst.DarkConn) {
 	end := make(chan byte, 2)
 	go pst.Forward(conn, destConn, end)
 	go pst.Forward(destConn, conn, end)
+	// each conn is done
+	<-end
 	<-end
 }
 
